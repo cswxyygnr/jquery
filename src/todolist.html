@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="jquery.js"></script>
+    <style>
+        body {
+            background-color: bisque;
+            /* width: 800px; */
+        }
+
+        .container {
+            align-content: center;
+            width: 800px;
+            margin: 0 auto;
+        }
+
+        .container .header {
+            /* background-color: blue; */
+            height: 60px;
+        }
+
+        #input {
+            line-height: 30px;
+            width: 80%;
+        }
+
+        p {
+            margin: 0 0 0 30px;
+            padding: 0;
+            display: inline-block;
+            min-width: 300px;
+        }
+
+        ul{
+            /* background-color: aquamarine; */
+            margin: 40px 0;
+        }
+
+        ul li {
+            position: relative;
+            list-style: none;
+            background-color: white;
+            line-height: 25px;
+            margin-bottom: 15px;
+            width: 80%;
+        }
+
+        ul li a {
+            position: absolute;
+            right: 20px;
+            bottom: 0;
+            font-size: 16px;
+            /* line-height: 20px; */
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <label for="input" style="font-size: 18px; margin-right: 15px;">TodoList</label>
+            <input type="text" id="input" placeholder="输入待办">
+        </div>
+
+        <div class="main">
+            <h3>正在进行</h3>
+            <ul class="ing"></ul>
+
+            <h3>完成事项</h3>
+            <ul class="ed"></ul>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            updateli();
+
+            $('input').keypress(function (e) {
+                // console.log(typeof e.originalEvent.key)
+                if (e.originalEvent.key == 'Enter') {
+                    let val = $('input').val();
+                    $('.ing').prepend('<li><input type="checkbox"><p>' + val + '</p><a>删除</a></li>');
+                    $('input').val(' ');
+                    updatetodo();
+                }
+                else return;
+            })
+
+            $('ul').on('change','li input', function(){
+                updatetodo();
+                updateli();
+            })
+
+            $('ul').on('click','li a',function(){
+                let data = JSON.parse(localStorage.getItem('todo'))
+                let index = data.forEach((item,index)=>{
+                    if(item.title == $(this).siblings('p').text())return index;
+                })
+
+                data.splice(index,1)
+                localStorage.setItem('todo',JSON.stringify(data));
+                updateli();
+            })
+
+        // $('.ing input').on('change',function () {
+        //     // $(this).prop('checked')
+        // })
+
+        function updateli() {
+            $('ul').empty();
+            let data = JSON.parse(localStorage.getItem('todo'));
+            $.each(data, function (i, n) {
+                if (!n.done) {
+                    $('.ing').prepend('<li><input type="checkbox"><p>' + n.title + '</p><a>删除</a></li>');
+                } else {
+                    $('.ed').prepend('<li><input type="checkbox" checked><p>' + n.title + '</p><a>删除</a></li>');
+                }
+
+            });
+
+        }
+
+        function updatetodo() {
+            let data = [];
+            let obj = {};
+            $.each($('ul li'), function (i, n) {
+                obj.done = $(n).children('input').prop('checked');
+                obj.title = $(n).children('p').text();
+                let tmp = {}
+                Object.assign(tmp, obj)
+                data.push(tmp)
+            })
+            localStorage.removeItem('todo');
+            localStorage.setItem('todo', JSON.stringify(data));
+        }
+        })
+    </script>
+</body>
+
+</html>
